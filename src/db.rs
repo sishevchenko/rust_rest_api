@@ -28,14 +28,14 @@ impl From<&String> for SupportsDBType {
 
 
 #[derive(Clone, Debug)]
-pub struct ApiDBConn {
+pub struct ApiDB {
     host: String,
     pool: Option<DatabaseConnection>,
     port: Option<u16>,
 }
 
 
-impl ApiDBConn {
+impl ApiDB {
     pub fn new(host: String, port: Option<u16>) -> Self {
         Self {
             host,
@@ -63,16 +63,16 @@ impl ApiDBConn {
                 Database::connect(&self.host).await?
             },
         };
-        self.pool = Some(pool.clone());
+        self.pool = Some(pool.to_owned());
         Ok(pool)
     }
 }
 
 
-impl Default for ApiDBConn {
+impl Default for ApiDB {
     fn default() -> Self {
         Self {
-            host: "sqlite://data.sqlite?mode=rwc".to_string(),
+            host: "sqlite://data.sqlite3?mode=rwc".to_string(),
             pool: Default::default(),
             port: Default::default(),
         }

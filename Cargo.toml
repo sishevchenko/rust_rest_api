@@ -10,6 +10,7 @@ dotenvy = "0.15.7"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 tokio = { version = "1.45.0", features = ["full"] }
+migration = { path = "migration" }
 
 [dependencies.sea-orm]
 version = "1.1.11"

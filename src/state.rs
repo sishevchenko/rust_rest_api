@@ -1,22 +1,22 @@
 use crate::config::Config;
-use crate::db::ApiDBConn;
+use crate::db::ApiDB;
 
 
 #[derive(Clone, Debug)]
 pub struct AppState {
     conf: Config,
-    conn: ApiDBConn,
+    db: ApiDB,
 }
 
 
 impl AppState {
-    pub fn new(conf: Config, conn: ApiDBConn) -> Self {
-        Self {conf, conn}
+    pub fn new(conf: Config, db: ApiDB) -> Self {
+        Self {conf, db}
     }
     pub fn get_conf(&self) -> &Config {
         &self.conf
     }
-    pub fn get_conn(&self) -> &ApiDBConn {
-        &self.conn
+    pub fn get_db(&self) -> ApiDB {
+        self.db.clone()
     }
 }

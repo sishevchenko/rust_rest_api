@@ -24,3 +24,4 @@ target/
 
 # Test SQLite DB
 *.sqlite
+*.sqlite3

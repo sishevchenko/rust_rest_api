@@ -4,6 +4,7 @@ use std::{
 };
 
 use axum::Router;
+use migration::{Migrator, MigratorTrait};
 
 mod config;
 use config::Config;
@@ -18,8 +19,14 @@ mod state;
 async fn start() -> Result<(), Box<dyn Error>> {
     dotenvy::dotenv().ok();
     let conf = Config::default();
-    let conn = db::ApiDBConn::default();
-    let app_state = state::AppState::new(conf, conn);
+    let mut db = db::ApiDB::default();
+
+    Migrator::up(
+        &db.get_conn().await
+        .expect("Database connection failed during migration script."), None).await
+        .expect("Failed migration script.");
+
+    let app_state = state::AppState::new(conf, db);
 
     let app = Router::new()
         .merge(urls::routers())
@@ -29,7 +36,7 @@ async fn start() -> Result<(), Box<dyn Error>> {
         app_state
             .get_conf()
             .url()).await
-            .unwrap();
+            .expect("Error in setting up TCP listener.");
     axum::serve(listener, app).await?;
     Ok(())
 }
