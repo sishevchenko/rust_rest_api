@@ -2,6 +2,7 @@ use sea_orm::*;
 use crate::state::AppState;
 
 use super::{
+    models as posts,
     PostEntity,
     PostModel,
     PostActiveModel,
@@ -15,11 +16,22 @@ impl PostService {
         Self {}
     }
 
-    pub async fn get_posts_list(&self, state: AppState) -> Vec<PostModel> {
-        let db = &state.get_db().get_conn().await
+    pub async fn get_posts_list(
+        &self,
+        state: AppState,
+        page: u64,
+        page_size: u64,
+    ) -> Vec<PostModel> {
+        let db = &state
+            .get_db()
+            .get_conn().await
             .expect("Database connection failed.");
-        let posts = PostEntity::find().all(db).await
-            .expect("");
+
+        let posts = PostEntity::find()
+            .order_by_asc(posts::Column::Id)
+            .paginate(db, page_size)
+            .fetch_page(page - 1).await
+            .unwrap();
         posts
     }
 
@@ -28,14 +40,16 @@ impl PostService {
         state: AppState,
         data: PostModel,
     ) -> PostModel {
-        let db = &state.get_db().get_conn().await
+        let db = &state
+            .get_db()
+            .get_conn().await
             .expect("Database connection failed.");
         let new_post = PostActiveModel {
             author: Set(data.author.to_owned()),
             content: Set(data.content.to_owned()),
             ..Default::default()
         }.save(db).await
-            .inspect_err(|err| {eprintln!("DbErr: {err}")})
+            .inspect_err(|err| { eprintln!("DbErr: {err}") })
             .unwrap()
             .try_into_model()
             .unwrap();
